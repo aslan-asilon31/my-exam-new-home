@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth; // Untuk Auth
 use Illuminate\Validation\ValidationException; // Untuk pengecualian validasi
 use App\Livewire\Auth\Forms\LoginForm;
 use Illuminate\Support\Facades\Hash;
+use Session;
+
 
 class Login extends Component
 {
@@ -30,35 +32,32 @@ class Login extends Component
     }
 
 
-    public function login()
+    // public function login()
+    // {
+    //     if (Auth::check()) {
+    //         return redirect('/dasbor');
+    //     }else{
+    //         return redirect('/login');
+    //     }
+    // }
+
+    public function login(Request $request)
     {
-        $validatedLoginForm = $this->validate(
-            $this->loginForm->rules(),
-            [],
-            $this->loginForm->attributes()
-          )['loginForm'] ?? [];
+        $data = [
+            'surel' => $request->input('surel'),
+            'sandi' => $request->input('sandi'),
+        ];
 
-            // Log nilai yang digunakan untuk otentikasi
-            Log::info('Attempting login with:', [
-                'surel' => $validatedLoginForm['surel'],
-                'sandi' => $validatedLoginForm['sandi']
-            ]);
-
-            // Mencoba untuk melakukan otentikasi
-            if (Auth::attempt(['surel' => $validatedLoginForm['surel'], 'sandi' => $validatedLoginForm['sandi']])) {
-                // Login berhasil
-                return redirect()->to('/dasbor');
-            } else {
-                // Login gagal
-                Log::warning('Login failed for:', ['surel' => $validatedLoginForm['surel']]);
-                throw ValidationException::withMessages([
-                    'sandi' => ['Surel atau sandi yang Anda masukkan salah.'],
-                ]);
-            }
+        if (Auth::Attempt($data)) {
+            return redirect('dasbor');
+        }else{
+            Session::flash('error', 'surel atau sandi Salah');
+            return redirect('/');
+        }
     }
 
 
-    #[Title('Konfirmasi Start')] 
+    #[Title('Konfirmasi Start')]
     public function render()
     {
 
